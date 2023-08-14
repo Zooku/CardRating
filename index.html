@@ -3,46 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Website</title>
+    <title>Google Sheets API Example</title>
 </head>
 <body>
-    <header>
-        <h1>Welcome to Test Website</h1>
-    </header>
+    <h1>Google Sheets API Example</h1>
     
-    <nav>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">About</a></li>
-            <li><a href="#">Contact</a></li>
-        </ul>
-    </nav>
+    <button id="readButton">Read Data</button>
+    <button id="writeButton">Write Data</button>
 
-    <main>
-        <section>
-            <h2>About Us</h2>
-            <p>This is a test website to demonstrate HTML and CSS.</p>
-        </section>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        const API_KEY = 'AIzaSyDkm6Akk4HErGTi6dXk3RJobwfh7Ub6WVc';
+        const SPREADSHEET_ID = '1FuiDHGGLBgGlvzc8q04fIGe-CAfdhQ0VcLWEgqPl1nc';
 
-        <section>
-            <h2>Contact Us</h2>
-            <form>
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+        // Load the API client and initialize
+        gapi.load('client', function () {
+            gapi.client.init({
+                apiKey: API_KEY,
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            });
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+            // Attach event listeners to buttons
+            document.getElementById('readButton').addEventListener('click', readData);
+            document.getElementById('writeButton').addEventListener('click', writeData);
+        });
 
-                <label for="message">Message:</label>
-                <textarea id="message" name="message" required></textarea>
+        // Function to read data from the sheet
+        function readData() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: SPREADSHEET_ID,
+                range: 'Sheet1', // Update with your sheet name and range
+            }).then(function(response) {
+                const values = response.result.values;
+                console.log('Read data:', values);
+            }, function(response) {
+                console.error('Error reading data:', response.result.error.message);
+            });
+        }
 
-                <input type="submit" value="Submit">
-            </form>
-        </section>
-    </main>
+        // Function to write data to the sheet
+        function writeData() {
+            const values = [
+                ['New Data A', 'New Data B']
+            ];
 
-    <footer>
-        <p>&copy; 2023 Test Website. All rights reserved.</p>
-    </footer>
+            gapi.client.sheets.spreadsheets.values.update({
+                spreadsheetId: SPREADSHEET_ID,
+                range: 'Sheet1', // Update with your sheet name and range
+                valueInputOption: 'RAW',
+                resource: {
+                    values: values,
+                },
+            }).then(function(response) {
+                console.log('Data written:', response.result);
+            }, function(response) {
+                console.error('Error writing data:', response.result.error.message);
+            });
+        }
+    </script>
 </body>
 </html>
