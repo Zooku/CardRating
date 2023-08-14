@@ -8,8 +8,18 @@
 <body>
     <h1>Google Sheets API Example</h1>
     
-    <button id="readButton">Read Data</button>
-    <button id="writeButton">Write Data</button>
+    <div>
+        <label for="readCell">Read From Cell:</label>
+        <input type="text" id="readCell" placeholder="Example: A1">
+        <button id="readButton">Read Data</button>
+    </div>
+    
+    <div>
+        <label for="writeCell">Write To Cell:</label>
+        <input type="text" id="writeCell" placeholder="Example: B2">
+        <input type="text" id="writeValue" placeholder="Value to Write">
+        <button id="writeButton">Write Data</button>
+    </div>
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
@@ -28,34 +38,34 @@
             document.getElementById('writeButton').addEventListener('click', writeData);
         });
 
-        // Function to read data from the sheet
+        // Function to read data from a specific cell
         function readData() {
+            const readCell = document.getElementById('readCell').value;
             gapi.client.sheets.spreadsheets.values.get({
                 spreadsheetId: SPREADSHEET_ID,
-                range: 'Sheet1', // Update with your sheet name and range
+                range: readCell,
             }).then(function(response) {
                 const values = response.result.values;
-                console.log('Read data:', values);
+                console.log(`Read from ${readCell}:`, values);
             }, function(response) {
                 console.error('Error reading data:', response.result.error.message);
             });
         }
 
-        // Function to write data to the sheet
+        // Function to write data to a specific cell
         function writeData() {
-            const values = [
-                ['New Data A', 'New Data B']
-            ];
+            const writeCell = document.getElementById('writeCell').value;
+            const writeValue = document.getElementById('writeValue').value;
 
             gapi.client.sheets.spreadsheets.values.update({
                 spreadsheetId: SPREADSHEET_ID,
-                range: 'Sheet1', // Update with your sheet name and range
+                range: writeCell,
                 valueInputOption: 'RAW',
                 resource: {
-                    values: values,
+                    values: [[writeValue]],
                 },
             }).then(function(response) {
-                console.log('Data written:', response.result);
+                console.log(`Data written to ${writeCell}:`, response.result);
             }, function(response) {
                 console.error('Error writing data:', response.result.error.message);
             });
