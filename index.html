@@ -26,8 +26,9 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script>
         const CLIENT_ID = '453226678739-4tvjllshmqb9uqsu8fqc34bckqqci0ov.apps.googleusercontent.com';
-        const API_KEY = 'AIzaSyDkm6Akk4HErGTi6dXk3RJobwfh7Ub6WVc';
-        const SPREADSHEET_ID = '1FuiDHGGLBgGlvzc8q04fIGe-CAfdhQ0VcLWEgqPl1nc';
+        const API_KEY = 'YOUR_API_KEY';
+        const SPREADSHEET_ID = 'YOUR_SPREADSHEET_ID';
+        let accessToken; // To store the access token after authentication
 
         function initialize() {
             gapi.load('client', function () {
@@ -47,6 +48,13 @@
             document.getElementById('writeButton').addEventListener('click', writeData);
         }
 
+        function authenticate() {
+            gapi.auth2.getAuthInstance().signIn().then(function() {
+                accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+                console.log("Authenticated!");
+            });
+        }
+
         function readData() {
             const readCell = document.getElementById('readCell').value;
             gapi.client.sheets.spreadsheets.values.get({
@@ -63,28 +71,29 @@
         }
 
         function writeData() {
+            if (!accessToken) {
+                authenticate(); // Authenticate if not already done
+                return;
+            }
+            
             const writeCell = document.getElementById('writeCell').value;
             const writeValue = document.getElementById('writeValue').value;
 
-            gapi.auth2.getAuthInstance().signIn().then(function() {
-                const accessToken = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
-
-                fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${writeCell}?valueInputOption=RAW`, {
-                    method: 'PUT',
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        values: [[writeValue]],
-                    }),
-                }).then(function(response) {
-                    const writeResultElement = document.getElementById('writeResult');
-                    writeResultElement.textContent = `Data written to ${writeCell}: ${JSON.stringify(response)}`;
-                }).catch(function(error) {
-                    const writeResultElement = document.getElementById('writeResult');
-                    writeResultElement.textContent = `Error writing data: ${error}`;
-                });
+            fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${writeCell}?valueInputOption=RAW`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    values: [[writeValue]],
+                }),
+            }).then(function(response) {
+                const writeResultElement = document.getElementById('writeResult');
+                writeResultElement.textContent = `Data written to ${writeCell}: ${JSON.stringify(response)}`;
+            }).catch(function(error) {
+                const writeResultElement = document.getElementById('writeResult');
+                writeResultElement.textContent = `Error writing data: ${error}`;
             });
         }
 
