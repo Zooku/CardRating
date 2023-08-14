@@ -26,19 +26,22 @@
         const API_KEY = 'AIzaSyDkm6Akk4HErGTi6dXk3RJobwfh7Ub6WVc';
         const SPREADSHEET_ID = '1FuiDHGGLBgGlvzc8q04fIGe-CAfdhQ0VcLWEgqPl1nc';
 
-        // Load the API client and initialize
-        gapi.load('client', function () {
-            gapi.client.init({
-                apiKey: API_KEY,
-                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+        function initialize() {
+            gapi.load('client', function () {
+                gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                }).then(function () {
+                    attachEventListeners();
+                });
             });
+        }
 
-            // Attach event listeners to buttons
+        function attachEventListeners() {
             document.getElementById('readButton').addEventListener('click', readData);
             document.getElementById('writeButton').addEventListener('click', writeData);
-        });
+        }
 
-        // Function to read data from a specific cell
         function readData() {
             const readCell = document.getElementById('readCell').value;
             gapi.client.sheets.spreadsheets.values.get({
@@ -52,7 +55,6 @@
             });
         }
 
-        // Function to write data to a specific cell
         function writeData() {
             const writeCell = document.getElementById('writeCell').value;
             const writeValue = document.getElementById('writeValue').value;
@@ -70,6 +72,9 @@
                 console.error('Error writing data:', response.result.error.message);
             });
         }
+
+        // Call the initialization function when the script is loaded
+        initialize();
     </script>
 </body>
 </html>
