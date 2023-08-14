@@ -89,6 +89,7 @@
                     values: [[writeValue]],
                 }),
             }).then(function(response) {
+                console.log(response)
                 const writeResultElement = document.getElementById('writeResult');
                 writeResultElement.textContent = `Data written to ${writeCell}: ${JSON.stringify(response)}`;
             }).catch(function(error) {
